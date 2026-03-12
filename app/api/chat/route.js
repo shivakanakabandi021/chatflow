@@ -1,6 +1,5 @@
 import { connectDB } from '@/lib/mongodb'
 import Message from '@/models/Message'
-import User from '@/models/User'
 import jwt from 'jsonwebtoken'
 
 const responses = {
@@ -58,22 +57,19 @@ export async function POST(req) {
       return Response.json({ error: 'Empty message' }, { status: 400 })
     }
 
-    // ✅ FIX: fetch username from database using userId
-    const user = await User.findById(decoded.userId)
-    if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
-
     const reply = getBotReply(message)
 
+    // ✅ FIXED: using decoded.username directly from JWT!
     await Message.create({
       userId: decoded.userId,
-      username: user.username,  // ✅ real username from DB
+      username: decoded.username,
       role: 'user',
       content: message
     })
 
     await Message.create({
       userId: decoded.userId,
-      username: user.username,  // ✅ real username from DB
+      username: decoded.username,
       role: 'bot',
       content: reply
     })
@@ -81,6 +77,7 @@ export async function POST(req) {
     return Response.json({ reply })
 
   } catch (err) {
+    console.error('Chat POST error:', err)
     return Response.json({ error: 'Server error' }, { status: 500 })
   }
 }

@@ -36,13 +36,15 @@ export async function POST(req) {
       if (!isMatch)
         return Response.json({ error: 'Wrong password' }, { status: 401 });
 
+      // ✅ FIXED: added expiresIn!
       const token = jwt.sign(
-{
-userId: user._id,
-username: user.username
-},
-process.env.JWT_SECRET
-)
+        {
+          userId: user._id,
+          username: user.username
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
 
       return Response.json({
         success: true,
