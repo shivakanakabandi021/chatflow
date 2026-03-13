@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// ✅ Emoji list — no package needed!
 const EMOJIS = [
   '😀','😂','😍','🥰','😎','🤔','😅','🤣',
   '😊','🥳','😜','🤩','😇','🙏','👍','👎',
@@ -27,12 +28,22 @@ export default function ChatPage() {
     const token = localStorage.getItem('token');
     if (!token) { router.push('/login'); return; }
     setUsername(localStorage.getItem('username') || 'User');
-    // ✅ fetchHistory REMOVED = fresh chat every login!
+    fetchHistory();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  async function fetchHistory() {
+    const token = localStorage.getItem('token');
+    const res   = await fetch('/api/chat', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    const data = await res.json();
+    if (data.messages) setMessages(data.messages);
+  }
 
   async function sendMessage() {
     if (!input.trim()) return;
@@ -65,6 +76,7 @@ export default function ChatPage() {
     setMessages([]);
   }
 
+  // ✅ Add emoji to input box
   function addEmoji(emoji) {
     setInput(prev => prev + emoji);
   }
@@ -85,7 +97,7 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen"
       style={{ background: 'linear-gradient(135deg, #0f2027 0%, #0a3d4a 50%, #0f2027 100%)' }}>
 
-      {/* HEADER */}
+      {/* ── HEADER ── */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0
         border-b border-white/10"
         style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)' }}>
@@ -108,17 +120,21 @@ export default function ChatPage() {
           <button
             onClick={() => { setShowSearch(!showSearch); setSearch(''); }}
             className="p-2 rounded-lg text-slate-400 hover:text-white
-              border border-white/10 hover:bg-white/10 transition-colors text-sm">
+              border border-white/10 hover:bg-white/10 transition-colors text-sm"
+            title="Search messages">
             🔍
           </button>
           <Link href="/profile"
             className="p-2 rounded-lg text-slate-400 hover:text-white
-              border border-white/10 hover:bg-white/10 transition-colors text-sm">
+              border border-white/10 hover:bg-white/10 transition-colors text-sm"
+            title="Your profile">
             👤
           </Link>
+          {/* ✅ NEW: Stats link */}
           <Link href="/stats"
             className="p-2 rounded-lg text-slate-400 hover:text-white
-              border border-white/10 hover:bg-white/10 transition-colors text-sm">
+              border border-white/10 hover:bg-white/10 transition-colors text-sm"
+            title="Chat stats">
             📊
           </Link>
           <button onClick={clearChat}
@@ -160,7 +176,7 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* MESSAGES */}
+      {/* ── MESSAGES ── */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {filteredMessages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center">
@@ -236,7 +252,7 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* EMOJI PICKER */}
+      {/* ✅ EMOJI PICKER — shows above input when 😀 clicked */}
       {showEmoji && (
         <div className="px-4 py-3 border-t border-white/10 flex-shrink-0"
           style={{ background: 'rgba(255,255,255,0.04)' }}>
@@ -254,10 +270,12 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* INPUT */}
+      {/* ── INPUT ── */}
       <div className="px-4 py-3 border-t border-white/10 flex-shrink-0"
         style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)' }}>
         <div className="flex gap-2 max-w-4xl mx-auto">
+
+          {/* ✅ Emoji toggle button */}
           <button
             onClick={() => setShowEmoji(!showEmoji)}
             className="px-3 py-3 rounded-xl text-xl transition-all border border-white/10
@@ -267,6 +285,7 @@ export default function ChatPage() {
               : 'rgba(255,255,255,0.05)' }}>
             😀
           </button>
+
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
