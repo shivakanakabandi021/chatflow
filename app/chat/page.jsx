@@ -26,7 +26,7 @@ export default function ChatPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { router.push('/login'); return; }
-    setusername(localStorage.getItem('username') || 'User');
+    setUsername(localStorage.getItem('username') || 'User');
     // ✅ fetchHistory REMOVED = fresh chat every login!
   }, []);
 
