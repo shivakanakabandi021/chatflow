@@ -1,3 +1,5 @@
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
