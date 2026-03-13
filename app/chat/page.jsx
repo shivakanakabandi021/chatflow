@@ -25,13 +25,20 @@ export default function ChatPage() {
   const router    = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) { router.push('/login'); return; }
-    setUsername(localStorage.getItem('username') || 'User');
-    fetchHistory();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const token = localStorage.getItem('token');
 
+  if (!token) {
+    router.push('/login');
+    return;
+  }
+
+  // load username
+  setUsername(localStorage.getItem('username') || 'User');
+
+  // start fresh chat (no previous messages)
+  setMessages([]);
+
+}, []);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
